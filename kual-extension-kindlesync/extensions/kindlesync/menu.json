@@ -1,0 +1,22 @@
+{
+    "items": [
+        {
+            "name": "kindlesync",
+            "priority": 10,
+            "items": [
+                {
+                    "name": "Refresh Bookserver",
+                    "action": "./bin/kindlesync-launch.sh refresh",
+                    "priority": 10,
+                    "exitmenu": false
+                },
+                {
+                    "name": "Sync from Bookserver",
+                    "priority": 10,
+                    "action": "./bin/kindlesync-launch.sh sync",
+                    "exitmenu": false
+                }
+            ]
+        }
+    ]
+}
