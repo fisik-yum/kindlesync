@@ -15,6 +15,12 @@
                     "priority": 10,
                     "action": "./bin/kindlesync-launch.sh sync",
                     "exitmenu": false
+                },
+                {
+                    "name": "Clean local library",
+                    "priority": 10,
+                    "action": "./bin/kindlesync-launch.sh clean",
+                    "exitmenu": false
                 }
             ]
         }
