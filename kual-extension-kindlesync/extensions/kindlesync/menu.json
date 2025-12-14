@@ -17,9 +17,9 @@
                     "exitmenu": false
                 },
                 {
-                    "name": "Clean local library",
+                    "name": "Sync and download from Bookserver",
                     "priority": 10,
-                    "action": "./bin/kindlesync-launch.sh clean",
+                    "action": "./bin/kindlesync-launch.sh sync-retrieve",
                     "exitmenu": false
                 }
             ]

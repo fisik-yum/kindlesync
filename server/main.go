@@ -1,36 +1,25 @@
 package main
 
 import (
-	//"errors"
-	"io"
 	"log"
-	"net/http"
-	"path/filepath"
-	//"os"
+
+	"go.etcd.io/bbolt"
 )
 
+
+
 func init() {
-	log.Println("Indexing library")
-	genDB()
-	log.Println("Index completed")
 }
 
 func main() {
-	http.HandleFunc("/refresh", func(w http.ResponseWriter, r *http.Request) {
-		log.Println("ACTION: Refresh")
-		genDB()
-		log.Println("OK")
-		io.WriteString(w, "OK")
-	})
-
-	http.HandleFunc("/books", func(w http.ResponseWriter, r *http.Request) {
-		log.Println("ACTION: Catalog")
-		http.ServeFile(w, r, "books")
-		log.Println("OK")
-	})
-
-	lib := http.FileServer(http.Dir(filepath.Join(".", "library")))
-	http.Handle("/library/", http.StripPrefix("/library", lib))
-
-	http.ListenAndServe(":8080", nil)
+	//serv := &http.Server{}
+	db,err:=bbolt.Open("books.db",0600,nil)
+	if err!=nil{
+		log.Fatal(err)
+	}
+	serv := newServer(8080, "library",db)
+	log.Println("Indexing library")
+	serv.genDB()
+	log.Println("Index completed")
+	serv.serve()
 }

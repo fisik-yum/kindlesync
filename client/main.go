@@ -1,14 +1,14 @@
 package main
 
 import (
-	"bufio"
+	"fmt"
 	"io"
 	"log"
 	"net/http"
 	"os"
 	"path/filepath"
-	"sort"
 
+	"go.etcd.io/bbolt"
 	"gopkg.in/ini.v1"
 )
 
@@ -29,39 +29,37 @@ func init() {
 
 func main() {
 	switch os.Args[1] {
-	case "refresh":
+	case "refresh": // force remote to refresh
 		r, e := http.Get(URL + "/refresh")
 		check(e)
 		s, e := io.ReadAll(r.Body)
 		check(e)
-		log.Println("Refresh: " + string(s))
-	case "sync":
-		booklist := getRemoteList()
-		for _, s := range booklist {
-			_, e := os.Stat(filepath.Join(libdir, s))
-			if e != nil {
-				downloadFile(filepath.Join(libdir, s), URL+"/library/"+s)
-				log.Printf("Download completed: %s\n", s)
-			}
+		log.Println("Refresh Catalog: " + string(s))
+	case "sync-retrieve": // download database and download all books to library
+		err := downloadFile(filepath.Join(".", "remote.db"), URL+"/sync")
+		if err != nil {
+			log.Fatal(err)
 		}
-	case "clean":
-		remoteList := getRemoteList()
-		sort.Strings(remoteList)
-		files, err := os.ReadDir(libdir)
-		check(err)
-		for _, n := range files {
-			loc := sort.SearchStrings(remoteList, n.Name())
-			if remoteList[loc] != n.Name() || loc == len(remoteList) {
-				_, err := os.Stat(filepath.Join(libdir, n.Name()))
-				if err != os.ErrNotExist {
-					err := os.Remove(filepath.Join(libdir, n.Name()))
-					check(err)
-					log.Printf("Deleted %s", n.Name())
+		log.Println("Retrieve Catalog: OK")
+		log.Println("Populating Library")
 
-				}
-			}
+		db,err:=bbolt.Open("remote.db",0600,nil)
+		if err != nil {
+			log.Fatal(err)
 		}
-		os.Exit(0)
+		tx,_:=db.Begin(false)
+		tx.Bucket([]byte("books")).ForEach(func(k, v []byte) error {
+			err:=downloadFile(filepath.Join(libdir,string(k)),fmt.Sprintf("%s/library/%s",URL,k))
+			return err
+		})
+		tx.Rollback()
+		db.Close()
+	case "sync": // plain sync - only retrieve the database
+		err := downloadFile(filepath.Join(".", "remote.db"), URL+"/sync")
+		if err != nil {
+			log.Fatal(err)
+		}
+		log.Println("Retrieve Catalog: OK")
 	default:
 		log.Println("Invalid command!")
 	}
@@ -71,18 +69,6 @@ func check(e error) {
 	if e != nil {
 		log.Fatal(e)
 	}
-}
-
-func getRemoteList() (ret []string) {
-	ret = make([]string, 0)
-	r, e := http.Get(URL + "/books")
-	check(e)
-	defer r.Body.Close()
-	scanner := bufio.NewScanner(r.Body)
-	for scanner.Scan() {
-		ret = append(ret, scanner.Text())
-	}
-	return
 }
 
 func downloadFile(filepath string, url string) (err error) {
