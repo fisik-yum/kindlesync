@@ -8,7 +8,7 @@ case "$1" in
         echo "OK"
     ;;
     "kual-kindle")
-        env GOOS=linux GOARCH=arm GOARM=7 go build && mv ${PROJ} ../kual-extension-kindlesync/kindlesync/
+        env GOOS=linux GOARCH=arm GOARM=7 go build && mv ${PROJ} res/kual-extension-kindlesync/kindlesync/
         echo "OK"
     ;;
     *) echo "invalid target!"

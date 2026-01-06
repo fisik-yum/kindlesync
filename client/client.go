@@ -1,4 +1,4 @@
-package main
+package client
 
 import (
 	"fmt"
@@ -17,7 +17,7 @@ var (
 	libdir string
 )
 
-func init() {
+func parseCfg() {
 	if len(os.Args) < 2 {
 		log.Fatal("Insufficient args")
 	}
@@ -27,8 +27,9 @@ func init() {
 	libdir = cfg.Section("").Key("library").String() //Always the absolute path (/mnt/us/path/to/dir)
 }
 
-func main() {
-	switch os.Args[1] {
+func Execute(command string) {
+	parseCfg()
+	switch command {
 	case "refresh": // force remote to refresh
 		r, e := http.Get(URL + "/refresh")
 		check(e)

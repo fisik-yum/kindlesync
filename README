@@ -1,0 +1,16 @@
+kindlesync
+==========
+kindlesync is a set of programs to handle file syncing between
+a personal computer and a kindle. It achieves this over HTTP.
+P2P sharing through mDNS is planned, assuming the network stack
+supports the technology.
+
+Largely, kindlesync works like a package manager - the client 
+synchronizes a local database, using it to download files from
+a server. The front-end is built as KUAL extension, which uses
+a helper script to execute commands.
+
+Feature tracker (items will be removed as they are implemented):
+[] File integrity checks
+[] P2P sharing over mDNS discovery
+    [] Dynamic KUAL menu generation
